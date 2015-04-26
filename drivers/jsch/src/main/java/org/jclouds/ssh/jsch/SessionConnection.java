@@ -169,15 +169,15 @@ public final class SessionConnection implements Connection<Session> {
             .getSession(loginCredentials.getUser(), hostAndPort.getHostText(), hostAndPort.getPortOrDefault(22));
       if (sessionTimeout != 0)
          session.setTimeout(sessionTimeout);
-      if (loginCredentials.hasUnencryptedPrivateKey()) {
-			byte[] privateKey = loginCredentials.getOptionalPrivateKey().get().getBytes();
-			jsch.addIdentity(loginCredentials.getUser(), privateKey, null, emptyPassPhrase);
-		} else if (loginCredentials.getOptionalPassword().isPresent()) {
-			session.setPassword(loginCredentials.getOptionalPassword().orNull());
-		} else if (agentConnector.isPresent()) {
-			JSch.setConfig("PreferredAuthentications", "publickey");
-			jsch.setIdentityRepository(new RemoteIdentityRepository(agentConnector.get()));
-		}
+      if (loginCredentials.loginCredentials.getOptionalPassword().isPresent()) {
+         session.setPassword(loginCredentials.getOptionalPassword().orNull());
+      } else if (loginCredentials.hasUnencryptedPrivateKey()) {
+         byte[] privateKey = loginCredentials.getOptionalPrivateKey().get().getBytes();
+         jsch.addIdentity(loginCredentials.getUser(), privateKey, null, emptyPassPhrase);
+      } else if (agentConnector.isPresent()) {
+         JSch.setConfig("PreferredAuthentications", "publickey");
+         jsch.setIdentityRepository(new RemoteIdentityRepository(agentConnector.get()));
+      }
       java.util.Properties config = new java.util.Properties();
       config.put("StrictHostKeyChecking", "no");
       session.setConfig(config);
